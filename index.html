@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JEE Progress Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <meta name="theme-color" content="#3b82f6">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>JEE Progress Tracker</h1>
+            </div>
+            <div class="header-controls">
+                <button class="btn-icon" id="importBtn" title="Import Data" aria-label="Import Data">
+    <i class="fas fa-upload"></i>
+</button>
+<input type="file" id="importFileInput" accept=".json" style="display: none;">
+                <button class="btn-icon" id="exportBtn" title="Export Data" aria-label="Export Data">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="btn-icon" id="exportPDFBtn" title="Export as PDF" aria-label="Export as PDF">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </header>
+<br>
+        <!-- Mobile Navigation -->
+        <nav class="mobile-nav"><br>
+            <button class="nav-btn active" data-tab="home" aria-label="Dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" data-tab="subjects" aria-label="Subjects">
+                <i class="fas fa-book"></i>
+                <span>Subjects</span>
+            </button>
+            <button class="nav-btn" data-tab="analysis" aria-label="Analysis">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analysis</span>
+            </button>
+            <button class="nav-btn" data-tab="tests" aria-label="Mock Tests">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Mock Tests</span>
+            </button>
+            <button class="nav-btn" data-tab="planner" aria-label="Weekly Planner">
+                <i class="fas fa-calendar-week"></i>
+                <span>Weekly Planner</span>
+            </button>
+        </nav>
+
+        <!-- Desktop Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" data-tab="home">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" data-tab="subjects">
+                <i class="fas fa-book"></i>
+                <span>Subjects</span>
+            </button>
+            <button class="nav-btn" data-tab="analysis">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analysis</span>
+            </button>
+            <button class="nav-btn" data-tab="tests">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Mock Tests</span>
+            </button>
+            <button class="nav-btn" data-tab="planner">
+                <i class="fas fa-calendar-week"></i>
+                <span>Weekly Planner</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="home">
+                <div class="dashboard-header">
+                    <div>
+                        <h2>Study Dashboard</h2>
+                        <div class="current-date" id="currentDate"></div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 14px; color: var(--text-secondary); font-weight: 600;">
+                            <i class="fas fa-fire" style="color: #f59e0b;"></i>
+                            Streak: <span id="streakCount">0</span> days
+                        </span>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Progress Card -->
+                    <div class="card stats-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-tasks"></i> Overall Progress</h3>
+                        </div>
+                        <div class="progress-circle">
+                            <div class="circle-background"></div>
+                            <div class="circle-progress" id="overallCircle"></div>
+                            <div class="circle-text">
+                                <span id="overallPercent">0%</span>
+                            </div>
+                        </div>
+                        <div class="stats-details">
+                            <div class="stat-item">
+                                <span class="stat-label">Completed</span>
+                                <span class="stat-value" id="completedCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Revised</span>
+                                <span class="stat-value" id="revisedCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Remaining</span>
+                                <span class="stat-value" id="remainingCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Card -->
+                    <div class="card stats-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Performance</h3>
+                        </div>
+                        <div class="performance-metric">
+                            <div class="metric-value" id="avgScore">0%</div>
+                            <div class="metric-label">Average Score</div>
+                        </div>
+                        <div class="stats-details">
+                            <div class="stat-item">
+                                <span class="stat-label">Tests Taken</span>
+                                <span class="stat-value" id="testsCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Highest Score</span>
+                                <span class="stat-value" id="highScore">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Planner Status Card -->
+                    <div class="card stats-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-calendar-check"></i> Weekly Planner</h3>
+                        </div>
+                        <div class="planner-status">
+                            <div class="week-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="weekProgress"></div>
+                                </div>
+                                <span class="progress-text" id="weekPercent">0%</span>
+                            </div>
+                            <div class="day-status-summary">
+                                <div class="status-item done">
+                                    <span class="status-dot"></span>
+                                    <span>Done: <strong id="doneDays">0</strong></span>
+                                </div>
+                                <div class="status-item partial">
+                                    <span class="status-dot"></span>
+                                    <span>Half Done: <strong id="halfDays">0</strong></span>
+                                </div>
+                                <div class="status-item not-done">
+                                    <span class="status-dot"></span>
+                                    <span>Not Done: <strong id="notDoneDays">0</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subjects Overview -->
+                    <div class="card full-width">
+                        <div class="card-header">
+                            <h3><i class="fas fa-book-open"></i> Subjects Overview</h3>
+                            <button class="btn btn-sm" id="addSubjectBtn">
+                                <i class="fas fa-plus"></i> Add Chapter
+                            </button>
+                        </div>
+                        <div class="subjects-overview" id="subjectsOverview">
+                            <!-- Subjects will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Information Card - Add this at the end of the dashboard tab -->
+<div class="card admin-info-card" style="margin-top: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+        <h3 style="color: white;"><i class="fas fa-user-tie"></i> Developer Information</h3>
+    </div>
+<div class="admin-details" style="padding: 20px;">
+    
+    <div class="admin-info-item" style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+        <i class="fas fa-user"></i>
+        <span><strong>Nomis</strong></span>
+    </div>
+    
+    <div class="admin-info-item" style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+        <i class="fas fa-robot"></i>
+        <span>
+            <a href="https://t.me/Nomis_121_Bot" target="_blank" style="color:white; text-decoration:underline;">
+                <strong>Telegram Bot:</strong>
+            </a>
+        </span>
+    </div>
+    
+    <div class="admin-info-item" style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+        <i class="fas fa-users"></i>
+        <span>
+        
+            <a href="https://t.me/Discussion_Group_Nomis" target="_blank" style="color:white; text-decoration:underline;">
+                   <strong>Discussion Group</strong> 
+            </a>
+        </span>
+    </div>
+    
+    <div class="admin-info-item" style="display: flex; align-items: center; gap: 12px;">
+        <i class="fas fa-broadcast-tower"></i>
+        <span>
+            <a href="https://t.me/ItsNomis" target="_blank" style="color:white; text-decoration:underline;">
+                    <strong>Its Nomis</strong>
+            </a>
+        </span>
+    </div>
+    
+</div>
+</div>
+                
+                </div>
+            </div>
+
+            <!-- Subjects Tab -->
+            <div class="tab-content" id="subjects">
+                <div class="page-header">
+                    <h2>Subject Management</h2>
+                    <div class="header-actions">
+                        <button class="btn" id="addNewSubjectBtn">
+                            <i class="fas fa-plus"></i> Add Chapter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="subjects-container" id="subjectsContainer">
+                    <!-- Subjects will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Analysis Tab -->
+            <div class="tab-content" id="analysis">
+                <div class="page-header">
+                    <h2>Performance Analysis</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-sm" onclick="jeeTracker.renderAnalysis()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-pie"></i> Chapter Completion</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="progressChart" aria-label="Chapter completion chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-bar"></i> Subject Progress</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="subjectChart" aria-label="Subject progress chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Test Trend</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="testChart" aria-label="Mock test trend chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mock Tests Tab -->
+            <div class="tab-content" id="tests">
+                <div class="page-header">
+                    <h2>Mock Test Tracker</h2>
+                    <div class="header-actions">
+                        <button class="btn" id="addTestBtn">
+                            <i class="fas fa-plus"></i> Add Mock Test
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tests-container" id="testsContainer">
+                    <!-- Tests will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Weekly Planner Tab -->
+            <div class="tab-content" id="planner">
+                <div class="page-header">
+                    <h2>Weekly Planner</h2>
+                    <div class="header-actions">
+                        <div class="week-selector">
+                            <input type="date" id="weekStartDate" aria-label="Select week start date">
+                        </div>
+                        <button class="btn" id="savePlannerBtn">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="btn btn-secondary" id="clearPlannerBtn">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <div class="week-progress-card">
+                    <div class="week-stats">
+                        <div class="week-stat">
+                            <div class="stat-value" id="weekCompletion">0%</div>
+                            <div class="stat-label">Week Completion</div>
+                        </div>
+                        <div class="week-stat">
+                            <div class="stat-value" id="tasksCompleted">0</div>
+                            <div class="stat-label">Tasks Completed</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="plannerProgress"></div>
+                    </div>
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-top: 12px; text-align: center;">
+                        <i class="fas fa-info-circle"></i> Progress auto-saves as you work
+                    </div>
+                </div>
+
+                <div class="week-grid" id="weekGrid">
+                    <!-- Days will be loaded here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Modals -->
+        <div class="modal" id="subjectModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add New Subject</h3>
+                    <button class="modal-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="subjectName">Subject Name</label>
+                        <input type="text" id="subjectName" placeholder="e.g., Physics, Chemistry, Mathematics">
+                    </div>
+                    <div class="form-group">
+                        <label>Add Chapters (Click + to add more)</label>
+                        <div id="chaptersContainer">
+                            <div class="chapter-input-row">
+                                <input type="text" class="chapter-input" placeholder="Chapter name">
+                                <button type="button" class="btn-icon btn-sm add-chapter-btn" aria-label="Add chapter">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-close">Cancel</button>
+                    <button class="btn" id="saveSubjectBtn">Save Subject</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="testModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Mock Test</h3>
+                    <button class="modal-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="testTitle">Test Name</label>
+                            <input type="text" id="testTitle" placeholder="e.g., JEE Main Mock 1" autofocus>
+                        </div>
+                        <div class="form-group">
+                            <label for="testDate">Date</label>
+                            <input type="date" id="testDate">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="physicsScore">Physics</label>
+                            <input type="number" id="physicsScore" min="0" max="100" placeholder="0-100">
+                        </div>
+                        <div class="form-group">
+                            <label for="chemistryScore">Chemistry</label>
+                            <input type="number" id="chemistryScore" min="0" max="100" placeholder="0-100">
+                        </div>
+                        <div class="form-group">
+                            <label for="mathScore">Mathematics</label>
+                            <input type="number" id="mathScore" min="0" max="100" placeholder="0-100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="testNotes">Notes (Optional)</label>
+                        <textarea id="testNotes" placeholder="Additional comments, topics to focus on..." rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-close">Cancel</button>
+                    <button class="btn" id="saveTestBtn">
+                        <i class="fas fa-save"></i> Save Test
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
